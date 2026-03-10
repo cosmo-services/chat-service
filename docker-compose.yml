@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:    
+  chat-service:
+    build: .
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
+    depends_on:
+      - chat-db
+    volumes:
+      - go-modules:/go/pkg/mod
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  chat-db:
+    image: postgres:15
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${CHAT_PG_NAME}
+      - POSTGRES_USER=${CHAT_PG_USER}
+      - POSTGRES_PASSWORD=${CHAT_PG_PASS}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "${PG_PORT}:5432"
+    volumes:
+      - chat-db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CHAT_PG_USER} -d ${CHAT_PG_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  chat-db_data:
+
+networks:
+  app-network:
+    driver: bridge
