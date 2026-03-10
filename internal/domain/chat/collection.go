@@ -6,6 +6,6 @@ type Collection struct {
 	Replies  map[string]*Message `json:"replies"`
 	Users    map[string]*User    `json:"users"`
 
-	HasNext bool `bson:"has_next" json:"has_next"`
-	HasPrev bool `bson:"has_prev" json:"has_prev"`
+	HasNext bool `json:"has_next"`
+	HasPrev bool `json:"has_prev"`
 }
