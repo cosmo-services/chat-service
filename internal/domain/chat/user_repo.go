@@ -9,4 +9,6 @@ type UserRepository interface {
 	UpdateUser(user *User) error
 	UserExistsById(userId string) (bool, error)
 	UserExistsByUsername(username string) (bool, error)
+	GetUserByIdUnscoped(userID string) (*User, error)
+	RestoreUser(userID string) error
 }

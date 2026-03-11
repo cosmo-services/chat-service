@@ -46,7 +46,15 @@ func (r *messageRepository) UpdateMessage(message *chat_domain.Message) error {
 
 	schema := ToSchemaMessage(message)
 
-	return r.db.Save(schema).Error
+	result := r.db.Save(schema)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return chat_domain.ErrMessageNotFound
+	}
+
+	return nil
 }
 
 func (r *messageRepository) DeleteMessage(id string) error {

@@ -33,3 +33,16 @@ CREATE TABLE chat_members (
 CREATE INDEX idx_chats_created_by ON chats (created_by);
 CREATE INDEX idx_members_chat ON chat_members (chat_id);
 CREATE INDEX idx_members_user ON chat_members (user_id);
+
+CREATE TABLE users (
+    user_id VARCHAR(36) PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    display_name VARCHAR(255) NOT NULL,
+    avatar_url TEXT,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    deleted_at TIMESTAMP
+);
+
+CREATE UNIQUE INDEX idx_users_username ON users (username);
+CREATE INDEX idx_users_deleted_at ON users (deleted_at);

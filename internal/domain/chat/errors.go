@@ -12,4 +12,5 @@ var (
 	ErrMessageNotFound     = errors.New("MESSAGE_NOT_FOUND")
 	ErrMessageAlreadyBound = errors.New("MESSAGE_ALREADY_BOUND")
 	ErrMemberNotFound      = errors.New("MEMBER_NOT_FOUND")
+	ErrUserNotFound        = errors.New("USER_NOT_FOUND")
 )
