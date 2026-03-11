@@ -7,7 +7,7 @@ import (
 )
 
 type UserSchema struct {
-	UserID      string         `gorm:"primaryKey"`
+	ID          string         `gorm:"primaryKey"`
 	Username    string         `gorm:"not null;uniqueIndex:idx_users_username"`
 	DisplayName string         `gorm:"not null"`
 	AvatarUrl   string         `gorm:"type:text"`

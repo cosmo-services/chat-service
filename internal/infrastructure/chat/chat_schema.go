@@ -27,6 +27,8 @@ type MemberSchema struct {
 	UserID   string    `gorm:"primaryKey;index:idx_members_user"`
 	Role     string    `gorm:"not null"`
 	JoinedAt time.Time `gorm:"autoCreateTime"`
+
+	User *UserSchema `gorm:"foreignKey:UserID;references:UserID"`
 }
 
 func (MemberSchema) TableName() string {

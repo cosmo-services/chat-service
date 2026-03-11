@@ -35,7 +35,7 @@ CREATE INDEX idx_members_chat ON chat_members (chat_id);
 CREATE INDEX idx_members_user ON chat_members (user_id);
 
 CREATE TABLE users (
-    user_id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
     display_name VARCHAR(255) NOT NULL,
     avatar_url TEXT,

@@ -1,19 +1,21 @@
 package chat_infrastructure
 
 import (
+	"context"
 	"errors"
 	"time"
 
 	chat_domain "main/internal/domain/chat"
+	"main/pkg"
 
 	"gorm.io/gorm"
 )
 
 type chatRepository struct {
-	db *gorm.DB
+	db pkg.GormDB
 }
 
-func NewChatRepository(db *gorm.DB) chat_domain.ChatRepository {
+func NewChatRepository(db pkg.GormDB) chat_domain.ChatRepository {
 	return &chatRepository{db: db}
 }
 
@@ -22,7 +24,7 @@ func (r *chatRepository) Create(chat *chat_domain.Chat) error {
 		return errors.New("chat cannot be nil")
 	}
 
-	return r.db.Transaction(func(tx *gorm.DB) error {
+	return r.db.WithTransaction(context.Background(), func(tx *gorm.DB) error {
 		schema := ToSchemaChat(chat)
 
 		if err := tx.Create(schema).Error; err != nil {
@@ -49,7 +51,7 @@ func (r *chatRepository) Update(chat *chat_domain.Chat) error {
 		return errors.New("chat cannot be nil")
 	}
 
-	return r.db.Transaction(func(tx *gorm.DB) error {
+	return r.db.WithTransaction(context.Background(), func(tx *gorm.DB) error {
 		schema := ToSchemaChat(chat)
 
 		if err := tx.Model(&ChatSchema{}).
@@ -73,7 +75,7 @@ func (r *chatRepository) Update(chat *chat_domain.Chat) error {
 func (r *chatRepository) GetChatById(id string) (*chat_domain.Chat, error) {
 	var chatSchema ChatSchema
 
-	err := r.db.
+	err := r.db.DB.
 		Preload("Members").
 		First(&chatSchema, "id = ?", id).Error
 
@@ -88,7 +90,7 @@ func (r *chatRepository) GetChatById(id string) (*chat_domain.Chat, error) {
 }
 
 func (r *chatRepository) Delete(id string) error {
-	result := r.db.Delete(&ChatSchema{}, "id = ?", id)
+	result := r.db.DB.Delete(&ChatSchema{}, "id = ?", id)
 
 	if result.RowsAffected == 0 {
 		return chat_domain.ErrChatNotFound
@@ -100,7 +102,7 @@ func (r *chatRepository) Delete(id string) error {
 func (r *chatRepository) GetDirectChat(firstUserID, secondUserID string) (*chat_domain.Chat, error) {
 	var chatSchema ChatSchema
 
-	err := r.db.
+	err := r.db.DB.
 		Preload("Members").
 		Where("type = ?", chat_domain.ChatTypeDirect).
 		Joins(`JOIN chat_members cm1 ON cm1.chat_id = chats.id 
@@ -122,7 +124,7 @@ func (r *chatRepository) GetDirectChat(firstUserID, secondUserID string) (*chat_
 func (r *chatRepository) DirectChatExists(firstUserID, secondUserID string) (bool, error) {
 	var count int64
 
-	err := r.db.
+	err := r.db.DB.
 		Model(&ChatSchema{}).
 		Where("type = ?", chat_domain.ChatTypeDirect).
 		Joins(`JOIN chat_members cm1 ON cm1.chat_id = chats.id 
@@ -141,7 +143,7 @@ func (r *chatRepository) DirectChatExists(firstUserID, secondUserID string) (boo
 func (r *chatRepository) ChatExists(chatID string) (bool, error) {
 	var count int64
 
-	err := r.db.
+	err := r.db.DB.
 		Model(&ChatSchema{}).
 		Where("id = ?", chatID).
 		Count(&count).Error
@@ -156,7 +158,7 @@ func (r *chatRepository) ChatExists(chatID string) (bool, error) {
 func (r *chatRepository) UserInChat(userID, chatID string) (bool, error) {
 	var count int64
 
-	err := r.db.
+	err := r.db.DB.
 		Model(&MemberSchema{}).
 		Where("chat_id = ? AND user_id = ?", chatID, userID).
 		Count(&count).Error
@@ -169,7 +171,7 @@ func (r *chatRepository) UserInChat(userID, chatID string) (bool, error) {
 }
 
 func (r *chatRepository) MarkUpdated(chatID string, updateTime time.Time) error {
-	err := r.db.
+	err := r.db.DB.
 		Model(&ChatSchema{}).
 		Where("id = ?", chatID).
 		Update("updated_at", updateTime).Error
@@ -180,7 +182,7 @@ func (r *chatRepository) MarkUpdated(chatID string, updateTime time.Time) error 
 func (r *chatRepository) GetChatByIdUnscoped(id string) (*chat_domain.Chat, error) {
 	var chatSchema ChatSchema
 
-	err := r.db.
+	err := r.db.DB.
 		Unscoped().
 		Preload("Members").
 		First(&chatSchema, "id = ?", id).Error
@@ -196,7 +198,7 @@ func (r *chatRepository) GetChatByIdUnscoped(id string) (*chat_domain.Chat, erro
 }
 
 func (r *chatRepository) RestoreChat(id string) error {
-	err := r.db.
+	err := r.db.DB.
 		Unscoped().
 		Model(&ChatSchema{}).
 		Where("id = ?", id).
@@ -213,11 +215,11 @@ func (r *chatRepository) AddMember(chatID string, member *chat_domain.ChatMember
 	schema := ToSchemaMember(member)
 	schema.ChatID = chatID
 
-	return r.db.Create(schema).Error
+	return r.db.DB.Create(schema).Error
 }
 
 func (r *chatRepository) RemoveMember(chatID, userID string) error {
-	result := r.db.
+	result := r.db.DB.
 		Delete(&MemberSchema{}, "chat_id = ? AND user_id = ?", chatID, userID)
 
 	if result.RowsAffected == 0 {
@@ -230,7 +232,7 @@ func (r *chatRepository) RemoveMember(chatID, userID string) error {
 func (r *chatRepository) GetMembers(chatID string) ([]*chat_domain.ChatMember, error) {
 	var members []MemberSchema
 
-	err := r.db.
+	err := r.db.DB.
 		Where("chat_id = ?", chatID).
 		Find(&members).Error
 

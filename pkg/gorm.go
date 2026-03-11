@@ -76,3 +76,8 @@ func (db GormDB) WithTransaction(ctx context.Context, fn func(tx *gorm.DB) error
 		return fn(tx.WithContext(ctx))
 	})
 }
+
+func (db GormDB) Paginate(query *gorm.DB, hasNext *bool, hasPrev *bool) (tx *gorm.DB) {
+
+	return nil
+}

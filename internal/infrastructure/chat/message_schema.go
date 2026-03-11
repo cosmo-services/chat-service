@@ -15,6 +15,10 @@ type MessageSchema struct {
 	CreatedAt time.Time      `gorm:"column:created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at"`
+
+	Reply *MessageSchema `gorm:"foreignKey:ReplyToID;references:ID"`
+	User  *UserSchema    `gorm:"foreignKey:SenderID;references:ID"`
+	Chat  *ChatSchema    `gorm:"foreignKey:ChatID;references:ID"`
 }
 
 func (MessageSchema) TableName() string {

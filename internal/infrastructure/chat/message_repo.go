@@ -3,15 +3,16 @@ package chat_infrastructure
 import (
 	"errors"
 	chat_domain "main/internal/domain/chat"
+	"main/pkg"
 
 	"gorm.io/gorm"
 )
 
 type messageRepository struct {
-	db *gorm.DB
+	db pkg.GormDB
 }
 
-func NewMessageRepository(db *gorm.DB) chat_domain.MessageRepository {
+func NewMessageRepository(db pkg.GormDB) chat_domain.MessageRepository {
 	return &messageRepository{db: db}
 }
 
@@ -22,13 +23,13 @@ func (r *messageRepository) CreateMessage(message *chat_domain.Message) error {
 
 	schema := ToSchemaMessage(message)
 
-	return r.db.Create(schema).Error
+	return r.db.DB.Create(schema).Error
 }
 
 func (r *messageRepository) GetMessageById(id string) (*chat_domain.Message, error) {
 	var msgSchema MessageSchema
 
-	err := r.db.First(&msgSchema, "id = ?", id).Error
+	err := r.db.DB.First(&msgSchema, "id = ?", id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, chat_domain.ErrMessageNotFound
@@ -46,7 +47,7 @@ func (r *messageRepository) UpdateMessage(message *chat_domain.Message) error {
 
 	schema := ToSchemaMessage(message)
 
-	result := r.db.Save(schema)
+	result := r.db.DB.Save(schema)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -58,7 +59,7 @@ func (r *messageRepository) UpdateMessage(message *chat_domain.Message) error {
 }
 
 func (r *messageRepository) DeleteMessage(id string) error {
-	result := r.db.Delete(&MessageSchema{}, "id = ?", id)
+	result := r.db.DB.Delete(&MessageSchema{}, "id = ?", id)
 
 	if result.RowsAffected == 0 {
 		return chat_domain.ErrMessageNotFound
@@ -70,7 +71,7 @@ func (r *messageRepository) DeleteMessage(id string) error {
 func (r *messageRepository) GetLastChatMessage(chatID string) (*chat_domain.Message, error) {
 	var msgSchema MessageSchema
 
-	err := r.db.
+	err := r.db.DB.
 		Where("chat_id = ?", chatID).
 		Order("created_at DESC").
 		First(&msgSchema).Error
@@ -88,7 +89,7 @@ func (r *messageRepository) GetLastChatMessage(chatID string) (*chat_domain.Mess
 func (r *messageRepository) GetMessageByIdUnscoped(id string) (*chat_domain.Message, error) {
 	var msgSchema MessageSchema
 
-	err := r.db.
+	err := r.db.DB.
 		Unscoped().
 		First(&msgSchema, "id = ?", id).Error
 
@@ -103,7 +104,7 @@ func (r *messageRepository) GetMessageByIdUnscoped(id string) (*chat_domain.Mess
 }
 
 func (r *messageRepository) RestoreMessage(id string) error {
-	err := r.db.
+	err := r.db.DB.
 		Unscoped().
 		Model(&MessageSchema{}).
 		Where("id = ?", id).
