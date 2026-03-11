@@ -6,16 +6,9 @@ import (
 	"gorm.io/gorm"
 )
 
-type ChatType string
-
-const (
-	ChatTypeDirect ChatType = "direct"
-	ChatTypeGroup  ChatType = "group"
-)
-
 type ChatSchema struct {
 	ID          string          `gorm:"primaryKey"`
-	Type        ChatType        `gorm:"not null"`
+	Type        string          `gorm:"not null"`
 	Name        string          `gorm:"not null"`
 	Description string          `gorm:"type:text"`
 	CreatedBy   string          `gorm:"not null;index:idx_chats_created_by"`
@@ -25,9 +18,17 @@ type ChatSchema struct {
 	DeletedAt   gorm.DeletedAt  `gorm:"index"`
 }
 
+func (ChatSchema) TableName() string {
+	return "chats"
+}
+
 type MemberSchema struct {
 	ChatID   string    `gorm:"primaryKey;index:idx_members_chat"`
 	UserID   string    `gorm:"primaryKey;index:idx_members_user"`
 	Role     string    `gorm:"not null"`
 	JoinedAt time.Time `gorm:"autoCreateTime"`
+}
+
+func (MemberSchema) TableName() string {
+	return "chat_members"
 }

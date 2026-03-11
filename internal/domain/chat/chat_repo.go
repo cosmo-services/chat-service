@@ -12,4 +12,7 @@ type ChatRepository interface {
 	ChatExists(chatId string) (bool, error)
 	DirectChatExists(firstUserID, secondUserID string) (bool, error)
 	UserInChat(userId, chatId string) (bool, error)
+	GetChatByIdUnscoped(id string) (*Chat, error)
+	RestoreChat(id string) error
+	AddMember(chatID string, member *ChatMember) error
 }

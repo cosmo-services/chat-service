@@ -16,3 +16,7 @@ type MessageSchema struct {
 	UpdatedAt time.Time      `gorm:"column:updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at"`
 }
+
+func (MessageSchema) TableName() string {
+	return "messages"
+}

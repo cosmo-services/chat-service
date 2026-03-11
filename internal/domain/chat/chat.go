@@ -18,8 +18,10 @@ type Chat struct {
 	Description string        `json:"description"`
 	CreatedBy   string        `json:"created_by"`
 	Members     []*ChatMember `json:"members"`
+	Deleted     bool          `json:"deleted"`
 	CreatedAt   time.Time     `json:"created_at"`
 	UpdatedAt   time.Time     `json:"updated_at"`
+	DeletedAt   time.Time     `json:"deleted_at"`
 }
 
 func (c *Chat) IsPersisted() bool {

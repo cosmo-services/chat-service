@@ -20,7 +20,7 @@ func (r *messageRepository) CreateMessage(message *chat_domain.Message) error {
 		return errors.New("message cannot be nil")
 	}
 
-	schema := toSchemaMessage(message)
+	schema := ToSchemaMessage(message)
 
 	return r.db.Create(schema).Error
 }
@@ -36,7 +36,7 @@ func (r *messageRepository) GetMessageById(id string) (*chat_domain.Message, err
 		return nil, err
 	}
 
-	return toDomainMessage(&msgSchema), nil
+	return ToDomainMessage(&msgSchema), nil
 }
 
 func (r *messageRepository) UpdateMessage(message *chat_domain.Message) error {
@@ -44,7 +44,7 @@ func (r *messageRepository) UpdateMessage(message *chat_domain.Message) error {
 		return errors.New("message cannot be nil")
 	}
 
-	schema := toSchemaMessage(message)
+	schema := ToSchemaMessage(message)
 
 	return r.db.Save(schema).Error
 }
@@ -74,7 +74,7 @@ func (r *messageRepository) GetLastChatMessage(chatID string) (*chat_domain.Mess
 		return nil, err
 	}
 
-	return toDomainMessage(&msgSchema), nil
+	return ToDomainMessage(&msgSchema), nil
 }
 
 func (r *messageRepository) GetMessageByIdUnscoped(id string) (*chat_domain.Message, error) {
@@ -91,7 +91,7 @@ func (r *messageRepository) GetMessageByIdUnscoped(id string) (*chat_domain.Mess
 		return nil, err
 	}
 
-	return toDomainMessage(&msgSchema), nil
+	return ToDomainMessage(&msgSchema), nil
 }
 
 func (r *messageRepository) RestoreMessage(id string) error {
@@ -105,39 +105,4 @@ func (r *messageRepository) RestoreMessage(id string) error {
 		return err
 	}
 	return nil
-}
-
-func toDomainMessage(m *MessageSchema) *chat_domain.Message {
-	if m == nil {
-		return nil
-	}
-
-	return &chat_domain.Message{
-		ID:        m.ID,
-		ChatID:    m.ChatID,
-		SenderID:  m.SenderID,
-		Content:   m.Content,
-		ReplyToId: m.ReplyToID,
-		Deleted:   !m.DeletedAt.Time.IsZero(),
-		CreatedAt: m.CreatedAt,
-		UpdatedAt: m.UpdatedAt,
-		DeletedAt: m.DeletedAt.Time,
-	}
-}
-
-func toSchemaMessage(m *chat_domain.Message) *MessageSchema {
-	if m == nil {
-		return nil
-	}
-
-	return &MessageSchema{
-		ID:        m.ID,
-		ChatID:    m.ChatID,
-		SenderID:  m.SenderID,
-		Content:   m.Content,
-		ReplyToID: m.ReplyToId,
-		CreatedAt: m.CreatedAt,
-		UpdatedAt: m.UpdatedAt,
-		DeletedAt: gorm.DeletedAt{Time: m.DeletedAt},
-	}
 }
