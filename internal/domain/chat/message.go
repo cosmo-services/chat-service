@@ -8,8 +8,10 @@ type Message struct {
 	SenderID  string    `json:"sender_id"`
 	Content   string    `json:"content"`
 	ReplyToId string    `json:"reply_to_id"`
+	Deleted   bool      `json:"deleted"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt time.Time `json:"deleted_at"`
 }
 
 func (m *Message) BindToChat(chat *Chat) error {
