@@ -1,9 +1,9 @@
-package api
+package http
 
 import (
-	health_api "main/internal/application/api/v2/health"
-	swagger_api "main/internal/application/api/v2/swagger"
-	test_api "main/internal/application/api/v2/test"
+	health_api "main/internal/application/http/v2/health"
+	swagger_api "main/internal/application/http/v2/swagger"
+	test_api "main/internal/application/http/v2/test"
 
 	"go.uber.org/fx"
 )

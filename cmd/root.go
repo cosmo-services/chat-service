@@ -9,7 +9,7 @@ import (
 
 	"main/pkg"
 
-	"main/internal/application/api/v2"
+	"main/internal/application/http/v2"
 	"main/internal/application/jobs"
 	"main/internal/config"
 )
@@ -19,7 +19,7 @@ func SetupApp(
 	env config.Env,
 	logger pkg.Logger,
 	handler pkg.RequestHandler,
-	routes api.Routes,
+	routes http.Routes,
 	workers jobs.Workers,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
