@@ -8,19 +8,24 @@ import (
 type ChatService struct {
 	userSync    *UserProfileSync
 	chatRepo    ChatRepository
-	msgRepo     MessageRepository
 	chatFactory *ChatFactory
+	msgRepo     MessageRepository
 	msgFactory  *MessageFactory
-	userRepo    UserRepository
 }
 
 func NewChatService(
 	userSync *UserProfileSync,
 	chatRepo ChatRepository,
+	chatFactory *ChatFactory,
+	msgRepo MessageRepository,
+	msgFactory *MessageFactory,
 ) *ChatService {
 	return &ChatService{
-		userSync: userSync,
-		chatRepo: chatRepo,
+		userSync:    userSync,
+		chatRepo:    chatRepo,
+		chatFactory: chatFactory,
+		msgRepo:     msgRepo,
+		msgFactory:  msgFactory,
 	}
 }
 

@@ -51,7 +51,7 @@ func (s *UserProfileSync) EnsureUserExists(opts UserSearchOptions) error {
 		return err
 	}
 
-	user := MapProfileToUser(userProfile)
+	user := s.mapProfileToUser(userProfile)
 	if err := s.userRepo.CreateUser(user); err != nil {
 		return err
 	}
@@ -90,10 +90,19 @@ func (s *UserProfileSync) GetUser(opts UserSearchOptions) (*User, error) {
 		return nil, err
 	}
 
-	syncUser := MapProfileToUser(userProfile)
+	syncUser := s.mapProfileToUser(userProfile)
 	if err := s.userRepo.CreateUser(syncUser); err != nil {
 		return nil, err
 	}
 
 	return syncUser, nil
+}
+
+func (s *UserProfileSync) mapProfileToUser(profile *social.UserProfile) *User {
+	return &User{
+		UserID:      profile.UserID,
+		Username:    profile.Username,
+		DisplayName: profile.DisplayName,
+		AvatarUrl:   profile.AvatarUrl,
+	}
 }
