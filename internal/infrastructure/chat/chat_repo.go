@@ -113,7 +113,7 @@ func (r *chatRepository) GetDirectChat(firstUserID, secondUserID string) (*chat_
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, chat_domain.ErrChatNotFound
+			return nil, nil
 		}
 		return nil, err
 	}

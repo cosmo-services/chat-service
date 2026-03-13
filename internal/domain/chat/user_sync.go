@@ -1,6 +1,9 @@
 package chat
 
-import "main/internal/domain/social"
+import (
+	"errors"
+	"main/internal/domain/social"
+)
 
 type UserProfileSync struct {
 	userRepo     UserRepository
@@ -17,8 +20,19 @@ func NewUserProfileSync(
 	}
 }
 
-func (s *UserProfileSync) EnsureUserExistsById(userId string) error {
-	exists, err := s.userRepo.UserExistsById(userId)
+func (s *UserProfileSync) EnsureUserExists(opts UserSearchOptions) error {
+	var userProfile *social.UserProfile
+	var exists bool
+	var err error
+
+	if opts.UserID != "" {
+		exists, err = s.userRepo.UserExistsById(opts.UserID)
+	} else if opts.Username != "" {
+		exists, err = s.userRepo.UserExistsByUsername(opts.Username)
+	} else {
+		return ErrUserNotFound
+	}
+
 	if err != nil {
 		return err
 	}
@@ -27,7 +41,12 @@ func (s *UserProfileSync) EnsureUserExistsById(userId string) error {
 		return nil
 	}
 
-	userProfile, err := s.socialClient.GetProfileByUserId(userId)
+	if opts.UserID != "" {
+		userProfile, err = s.socialClient.GetProfileByUserId(opts.UserID)
+	} else if opts.Username != "" {
+		userProfile, err = s.socialClient.GetProfileByUsername(opts.Username)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -40,25 +59,41 @@ func (s *UserProfileSync) EnsureUserExistsById(userId string) error {
 	return nil
 }
 
-func (s *UserProfileSync) EnsureUserExistsByUsername(username string) error {
-	exists, err := s.userRepo.UserExistsByUsername(username)
+func (s *UserProfileSync) GetUser(opts UserSearchOptions) (*User, error) {
+	var userProfile *social.UserProfile
+	var user *User
+	var err error
+
+	if opts.UserID != "" {
+		user, err = s.userRepo.GetUserById(opts.UserID)
+	} else if opts.Username != "" {
+		user, err = s.userRepo.GetUserByUsername(opts.Username)
+	} else {
+		return nil, ErrUserNotFound
+	}
+
+	if err == nil {
+		return user, err
+	}
+
+	if !errors.Is(err, ErrUserNotFound) {
+		return nil, err
+	}
+
+	if opts.UserID != "" {
+		userProfile, err = s.socialClient.GetProfileByUserId(opts.UserID)
+	} else if opts.Username != "" {
+		userProfile, err = s.socialClient.GetProfileByUsername(opts.Username)
+	}
+
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if exists {
-		return nil
+	syncUser := MapProfileToUser(userProfile)
+	if err := s.userRepo.CreateUser(syncUser); err != nil {
+		return nil, err
 	}
 
-	userProfile, err := s.socialClient.GetProgileByUsername(username)
-	if err != nil {
-		return err
-	}
-
-	user := MapProfileToUser(userProfile)
-	if err := s.userRepo.CreateUser(user); err != nil {
-		return err
-	}
-
-	return nil
+	return syncUser, nil
 }
