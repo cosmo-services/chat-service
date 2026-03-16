@@ -12,6 +12,7 @@ type ChatSchema struct {
 	Name        string          `gorm:"not null"`
 	Description string          `gorm:"type:text"`
 	CreatedBy   string          `gorm:"not null;index:idx_chats_created_by"`
+	AvatarUrl   string          `gorm:"type:text"`
 	Members     []*MemberSchema `gorm:"foreignKey:ChatID;references:ID;constraint:OnDelete:CASCADE"`
 	CreatedAt   time.Time       `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time       `gorm:"autoUpdateTime"`

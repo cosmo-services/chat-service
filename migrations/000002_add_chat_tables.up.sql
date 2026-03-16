@@ -16,6 +16,7 @@ CREATE TABLE chats (
     type VARCHAR(20) NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
+    avatar_url TEXT,
     created_by VARCHAR(36) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,

@@ -24,6 +24,7 @@ func ToDomainChat(s *ChatSchema) *chat_domain.Chat {
 		CreatedBy:   s.CreatedBy,
 		Members:     members,
 		Deleted:     !s.DeletedAt.Time.IsZero(),
+		AvatarUrl:   s.AvatarUrl,
 		CreatedAt:   s.CreatedAt,
 		UpdatedAt:   s.UpdatedAt,
 		DeletedAt:   s.DeletedAt.Time,
@@ -49,6 +50,7 @@ func ToSchemaChat(c *chat_domain.Chat) *ChatSchema {
 		Description: c.Description,
 		CreatedBy:   c.CreatedBy,
 		Members:     members,
+		AvatarUrl:   c.AvatarUrl,
 		CreatedAt:   c.CreatedAt,
 		UpdatedAt:   c.UpdatedAt,
 	}

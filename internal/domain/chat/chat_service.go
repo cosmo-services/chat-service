@@ -11,6 +11,7 @@ type ChatService struct {
 	chatFactory *ChatFactory
 	msgRepo     MessageRepository
 	msgFactory  *MessageFactory
+	realTime    *RealTimeService
 }
 
 func NewChatService(
@@ -19,6 +20,7 @@ func NewChatService(
 	chatFactory *ChatFactory,
 	msgRepo MessageRepository,
 	msgFactory *MessageFactory,
+	realTime *RealTimeService,
 ) *ChatService {
 	return &ChatService{
 		userSync:    userSync,
@@ -26,6 +28,7 @@ func NewChatService(
 		chatFactory: chatFactory,
 		msgRepo:     msgRepo,
 		msgFactory:  msgFactory,
+		realTime:    realTime,
 	}
 }
 
@@ -48,7 +51,8 @@ func (s *ChatService) GetDirectChat(firstUserId string, secodndUserId string) (*
 }
 
 func (s *ChatService) SendDirectMessage(userId string, recipientUsername string, content string) error {
-	if err := s.userSync.EnsureUserExists(UserSearchOptions{UserID: userId}); err != nil {
+	sender, err := s.userSync.GetUser(UserSearchOptions{UserID: userId})
+	if err != nil {
 		return err
 	}
 
@@ -68,6 +72,15 @@ func (s *ChatService) SendDirectMessage(userId string, recipientUsername string,
 	}
 
 	if err := s.PersistMessage(userId, direct, msg); err != nil {
+		return err
+	}
+
+	if err := s.realTime.NewMessage(NewMessagePayload{
+		Chat:      direct,
+		Message:   msg,
+		Sender:    sender,
+		Recipient: recipient,
+	}); err != nil {
 		return err
 	}
 
