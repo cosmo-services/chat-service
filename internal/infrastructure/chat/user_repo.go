@@ -62,7 +62,7 @@ func (r *userRepository) UpdateUser(user *chat_domain.User) error {
 	schema := ToSchemaUser(user)
 
 	return r.db.DB.Model(&UserSchema{}).
-		Where("user_id = ?", user.UserID).
+		Where("user_id = ?", user.ID).
 		Updates(map[string]interface{}{
 			"username":     schema.Username,
 			"display_name": schema.DisplayName,

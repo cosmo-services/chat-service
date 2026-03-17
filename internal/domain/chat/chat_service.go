@@ -5,13 +5,18 @@ import (
 	"time"
 )
 
+const (
+	NewMessageEvent string = "new_message"
+)
+
 type ChatService struct {
 	userSync    *UserProfileSync
 	chatRepo    ChatRepository
 	chatFactory *ChatFactory
 	msgRepo     MessageRepository
 	msgFactory  *MessageFactory
-	realTime    *RealTimeService
+	viewService *ViewService
+	publisher   Publisher
 }
 
 func NewChatService(
@@ -20,7 +25,8 @@ func NewChatService(
 	chatFactory *ChatFactory,
 	msgRepo MessageRepository,
 	msgFactory *MessageFactory,
-	realTime *RealTimeService,
+	viewService *ViewService,
+	publisher Publisher,
 ) *ChatService {
 	return &ChatService{
 		userSync:    userSync,
@@ -28,7 +34,8 @@ func NewChatService(
 		chatFactory: chatFactory,
 		msgRepo:     msgRepo,
 		msgFactory:  msgFactory,
-		realTime:    realTime,
+		viewService: viewService,
+		publisher:   publisher,
 	}
 }
 
@@ -61,7 +68,7 @@ func (s *ChatService) SendDirectMessage(userId string, recipientUsername string,
 		return err
 	}
 
-	direct, err := s.GetDirectChat(userId, recipient.UserID)
+	direct, err := s.GetDirectChat(userId, recipient.ID)
 	if err != nil {
 		return err
 	}
@@ -75,12 +82,13 @@ func (s *ChatService) SendDirectMessage(userId string, recipientUsername string,
 		return err
 	}
 
-	if err := s.realTime.NewMessage(NewMessagePayload{
-		Chat:      direct,
-		Message:   msg,
-		Sender:    sender,
-		Recipient: recipient,
-	}); err != nil {
+	collViewMap, err := s.viewService.ProjectCollectionForViewers(
+		direct.GetMembersId(), NewDirectMessageCollection(direct, msg, sender, recipient))
+	if err != nil {
+		return err
+	}
+
+	if err := s.publisher.PublishToUsers(NewMessageEvent, collViewMap); err != nil {
 		return err
 	}
 

@@ -45,3 +45,13 @@ type CollectionView struct {
 	HasNext bool `json:"has_next"`
 	HasPrev bool `json:"has_prev"`
 }
+
+func NewCollectionView() *CollectionView {
+	return &CollectionView{
+		Chats:    make(map[string]*ChatView),
+		Messages: make(map[string]*MessageView),
+		Users:    make(map[string]*UserView),
+		HasNext:  false,
+		HasPrev:  false,
+	}
+}

@@ -7,4 +7,5 @@ var Module = fx.Options(
 	fx.Provide(NewChatFactory),
 	fx.Provide(NewMessageFactory),
 	fx.Provide(NewChatService),
+	fx.Provide(NewViewService),
 )

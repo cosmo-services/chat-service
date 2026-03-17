@@ -100,7 +100,7 @@ func (s *UserProfileSync) GetUser(opts UserSearchOptions) (*User, error) {
 
 func (s *UserProfileSync) mapProfileToUser(profile *social.UserProfile) *User {
 	return &User{
-		UserID:      profile.UserID,
+		ID:          profile.UserID,
 		Username:    profile.Username,
 		DisplayName: profile.DisplayName,
 		AvatarUrl:   profile.AvatarUrl,

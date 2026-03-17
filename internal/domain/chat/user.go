@@ -3,7 +3,7 @@ package chat
 import "time"
 
 type User struct {
-	UserID      string    `json:"user_id"`
+	ID          string    `json:"id"`
 	Username    string    `json:"username"`
 	DisplayName string    `json:"display_name"`
 	AvatarUrl   string    `json:"avatar_url"`

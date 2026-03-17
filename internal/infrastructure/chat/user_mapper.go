@@ -11,7 +11,7 @@ func ToDomainUser(s *UserSchema) *chat_domain.User {
 		return nil
 	}
 	return &chat_domain.User{
-		UserID:      s.ID,
+		ID:          s.ID,
 		Username:    s.Username,
 		DisplayName: s.DisplayName,
 		AvatarUrl:   s.AvatarUrl,
@@ -26,7 +26,7 @@ func ToSchemaUser(u *chat_domain.User) *UserSchema {
 		return nil
 	}
 	return &UserSchema{
-		ID:          u.UserID,
+		ID:          u.ID,
 		Username:    u.Username,
 		DisplayName: u.DisplayName,
 		AvatarUrl:   u.AvatarUrl,
