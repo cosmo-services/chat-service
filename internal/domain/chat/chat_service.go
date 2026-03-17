@@ -82,13 +82,8 @@ func (s *ChatService) SendDirectMessage(userId string, recipientUsername string,
 		return err
 	}
 
-	collViewMap, err := s.viewService.ProjectCollectionForViewers(
-		direct.GetMembersId(), NewDirectMessageCollection(direct, msg, sender, recipient))
-	if err != nil {
-		return err
-	}
-
-	if err := s.publisher.PublishToUsers(NewMessageEvent, collViewMap); err != nil {
+	collection := NewDirectMessageCollection(direct, msg, sender, recipient)
+	if err := s.deliverToChatMembers(direct, collection, NewMessageEvent); err != nil {
 		return err
 	}
 
@@ -111,6 +106,19 @@ func (s *ChatService) PersistMessage(userId string, chat *Chat, msg *Message) er
 	}
 
 	if err := s.chatRepo.MarkUpdated(chat.ID, time.Now()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *ChatService) deliverToChatMembers(chat *Chat, collection *Collection, eventType string) error {
+	collViewMap, err := s.viewService.ProjectCollectionForViewers(chat.GetMembersId(), collection)
+	if err != nil {
+		return err
+	}
+
+	if err := s.publisher.PublishToUsers(eventType, collViewMap); err != nil {
 		return err
 	}
 
