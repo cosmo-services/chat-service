@@ -42,7 +42,7 @@ func NewChatService(
 	}
 }
 
-func (s *ChatService) GetDirectChatView(firstUserId string, secodnUsername string, filter MessageSearchFilter) (*CollectionView, error) {
+func (s *ChatService) GetDirectMessageHistoryView(firstUserId string, secodnUsername string, filter MessageSearchFilter) (*CollectionView, error) {
 	var directCollection *Collection
 	var err error
 
@@ -76,6 +76,20 @@ func (s *ChatService) GetDirectChatView(firstUserId string, secodnUsername strin
 	}
 
 	return directCollectionView, nil
+}
+
+func (s *ChatService) GetChatMessageHistoryView(userId string, chatId string, filter MessageSearchFilter) (*CollectionView, error) {
+	collection, err := s.chatQuery.GetMessageHistory(chatId, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	collectionView, err := s.viewService.ProjectCollectionForViewer(userId, collection)
+	if err != nil {
+		return nil, err
+	}
+
+	return collectionView, nil
 }
 
 func (s *ChatService) GetDirectChat(firstUserId string, secodndUserId string) (*Chat, error) {
