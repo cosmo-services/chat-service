@@ -116,6 +116,5 @@ func (s *ViewService) projectUser(user *User) *UserView {
 		Username:    user.Username,
 		DisplayName: user.DisplayName,
 		AvatarUrl:   user.AvatarUrl,
-		CreatedAt:   user.CreatedAt,
 	}
 }

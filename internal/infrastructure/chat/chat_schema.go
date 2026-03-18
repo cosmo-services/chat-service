@@ -24,10 +24,11 @@ func (ChatSchema) TableName() string {
 }
 
 type MemberSchema struct {
-	ChatID   string    `gorm:"primaryKey;index:idx_members_chat"`
-	UserID   string    `gorm:"primaryKey;index:idx_members_user"`
-	Role     string    `gorm:"not null"`
-	JoinedAt time.Time `gorm:"autoCreateTime"`
+	ChatID    string         `gorm:"primaryKey;index:idx_members_chat"`
+	UserID    string         `gorm:"primaryKey;index:idx_members_user"`
+	Role      string         `gorm:"not null"`
+	JoinedAt  time.Time      `gorm:"autoCreateTime"`
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	User *UserSchema `gorm:"foreignKey:UserID;references:ID"`
 }

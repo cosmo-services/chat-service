@@ -22,6 +22,10 @@ github.com/containerd/errdefs/pkg v0.3.0 h1:9IKJ06FvyNlexW690DXuQNx2KA2cUJXx151X
 github.com/containerd/errdefs/pkg v0.3.0/go.mod h1:NJw6s9HwNuRhnjJhM7pylWwMyAkmCQvQ4GpJHEqRLVk=
 github.com/cosmo-services/grpc-contracts v1.0.4 h1:Na9PG/K5x73nKvTebbwyM6elc9nMpzrcEptzxGxNWts=
 github.com/cosmo-services/grpc-contracts v1.0.4/go.mod h1:KLqK8BwrjgV02afbJGK3jOWmWldp9JUpF13hXeq76xs=
+github.com/cosmo-services/grpc-contracts v1.0.5 h1:BiUQO3eKN464SOHsghv8AxwOzmEivj0qe4s0davoV0Q=
+github.com/cosmo-services/grpc-contracts v1.0.5/go.mod h1:KLqK8BwrjgV02afbJGK3jOWmWldp9JUpF13hXeq76xs=
+github.com/cosmo-services/grpc-contracts v1.0.7 h1:5C/PL2BFPy9EEMT6WBNqgwsf8meY7fmR/Rxbx/4QFdU=
+github.com/cosmo-services/grpc-contracts v1.0.7/go.mod h1:KLqK8BwrjgV02afbJGK3jOWmWldp9JUpF13hXeq76xs=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

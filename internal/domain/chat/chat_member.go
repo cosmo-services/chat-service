@@ -12,7 +12,8 @@ const (
 )
 
 type ChatMember struct {
-	UserID   string         `json:"user_id"`
-	Role     ChatMemberRole `json:"role"`
-	JoinedAt time.Time      `json:"joined_at"`
+	UserID    string         `json:"user_id"`
+	Role      ChatMemberRole `json:"role"`
+	JoinedAt  time.Time      `json:"joined_at"`
+	DeletedAt time.Time      `json:"deleted_at"`
 }

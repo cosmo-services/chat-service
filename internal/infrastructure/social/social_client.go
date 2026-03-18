@@ -89,9 +89,10 @@ func (c *GrpcSocialClient) mapGRPCError(err error) error {
 
 func (c *GrpcSocialClient) mapToDomainUserProfile(response *pb.GetUserProfileResponse) *social_domain.UserProfile {
 	return &social_domain.UserProfile{
-		UserID:      response.Profile.Id,
+		UserID:      response.Profile.UserId,
 		Username:    response.Profile.Username,
 		DisplayName: response.Profile.DisplayName,
 		AvatarUrl:   response.Profile.AvatarUrl,
+		IsActive:    response.Profile.IsActive,
 	}
 }

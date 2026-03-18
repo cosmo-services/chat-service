@@ -62,9 +62,10 @@ func ToDomainMember(s *MemberSchema) *chat_domain.ChatMember {
 	}
 
 	return &chat_domain.ChatMember{
-		UserID:   s.UserID,
-		Role:     chat_domain.ChatMemberRole(s.Role),
-		JoinedAt: s.JoinedAt,
+		UserID:    s.UserID,
+		Role:      chat_domain.ChatMemberRole(s.Role),
+		JoinedAt:  s.JoinedAt,
+		DeletedAt: s.DeletedAt.Time,
 	}
 }
 

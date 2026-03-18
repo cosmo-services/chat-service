@@ -5,4 +5,5 @@ type UserProfile struct {
 	Username    string
 	DisplayName string
 	AvatarUrl   string
+	IsActive    bool
 }

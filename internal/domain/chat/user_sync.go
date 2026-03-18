@@ -104,5 +104,6 @@ func (s *UserProfileSync) mapProfileToUser(profile *social.UserProfile) *User {
 		Username:    profile.Username,
 		DisplayName: profile.DisplayName,
 		AvatarUrl:   profile.AvatarUrl,
+		IsActive:    profile.IsActive,
 	}
 }

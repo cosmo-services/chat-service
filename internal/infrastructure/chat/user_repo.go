@@ -2,6 +2,7 @@ package chat_infrastructure
 
 import (
 	"errors"
+	"time"
 
 	chat_domain "main/internal/domain/chat"
 	"main/pkg"
@@ -21,7 +22,7 @@ func (r *userRepository) CreateUser(user *chat_domain.User) error {
 	if user == nil {
 		return errors.New("user cannot be nil")
 	}
-
+	user.CreatedAt = time.Now()
 	schema := ToSchemaUser(user)
 	return r.db.DB.Create(schema).Error
 }
@@ -59,6 +60,7 @@ func (r *userRepository) UpdateUser(user *chat_domain.User) error {
 		return errors.New("user cannot be nil")
 	}
 
+	user.UpdatedAt = time.Now()
 	schema := ToSchemaUser(user)
 
 	return r.db.DB.Model(&UserSchema{}).

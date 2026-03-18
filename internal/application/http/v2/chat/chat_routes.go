@@ -28,6 +28,7 @@ func (r *ChatRoutes) Setup() {
 	read.Use(r.authMiddleware.RequireAuth())
 	{
 		read.GET("/history", r.controller.GetChatsHistory)
+		read.GET("/direct/:username/messages", r.controller.GetDirectMessages)
 	}
 
 	cmd := api.Group("/")
