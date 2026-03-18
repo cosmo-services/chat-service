@@ -29,7 +29,7 @@ func (r *userRepository) CreateUser(user *chat_domain.User) error {
 func (r *userRepository) GetUserById(userID string) (*chat_domain.User, error) {
 	var userSchema UserSchema
 
-	err := r.db.DB.First(&userSchema, "user_id = ?", userID).Error
+	err := r.db.DB.First(&userSchema, "id = ?", userID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, chat_domain.ErrUserNotFound
@@ -62,7 +62,7 @@ func (r *userRepository) UpdateUser(user *chat_domain.User) error {
 	schema := ToSchemaUser(user)
 
 	return r.db.DB.Model(&UserSchema{}).
-		Where("user_id = ?", user.ID).
+		Where("id = ?", user.ID).
 		Updates(map[string]interface{}{
 			"username":     schema.Username,
 			"display_name": schema.DisplayName,
@@ -81,7 +81,7 @@ func (r *userRepository) DeleteUserByUsername(username string) error {
 }
 
 func (r *userRepository) DeleteUserById(userID string) error {
-	result := r.db.DB.Delete(&UserSchema{}, "user_id = ?", userID)
+	result := r.db.DB.Delete(&UserSchema{}, "id = ?", userID)
 
 	if result.RowsAffected == 0 {
 		return chat_domain.ErrUserNotFound
@@ -92,7 +92,7 @@ func (r *userRepository) DeleteUserById(userID string) error {
 func (r *userRepository) UserExistsById(userID string) (bool, error) {
 	var count int64
 	err := r.db.DB.Model(&UserSchema{}).
-		Where("user_id = ?", userID).
+		Where("id = ?", userID).
 		Count(&count).Error
 
 	return count > 0, err
@@ -110,7 +110,7 @@ func (r *userRepository) UserExistsByUsername(username string) (bool, error) {
 func (r *userRepository) GetUserByIdUnscoped(userID string) (*chat_domain.User, error) {
 	var userSchema UserSchema
 
-	err := r.db.DB.Unscoped().First(&userSchema, "user_id = ?", userID).Error
+	err := r.db.DB.Unscoped().First(&userSchema, "id = ?", userID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, chat_domain.ErrUserNotFound
@@ -124,6 +124,6 @@ func (r *userRepository) GetUserByIdUnscoped(userID string) (*chat_domain.User, 
 func (r *userRepository) RestoreUser(userID string) error {
 	return r.db.DB.Unscoped().
 		Model(&UserSchema{}).
-		Where("user_id = ?", userID).
+		Where("id = ?", userID).
 		Update("deleted_at", nil).Error
 }

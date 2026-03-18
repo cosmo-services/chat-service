@@ -13,11 +13,11 @@ type Env struct {
 	AppEnv string `mapstructure:"APP_ENV"`
 	Port   string `mapstructure:"PORT"`
 
-	PGHost string `mapstructure:"PG_HOST"`
-	PGPort string `mapstructure:"PG_PORT"`
-	PGUser string `mapstructure:"PG_USER"`
-	PGPass string `mapstructure:"PG_PASS"`
-	PGName string `mapstructure:"PG_NAME"`
+	PGHost string `mapstructure:"CHAT_PG_HOST"`
+	PGPort string `mapstructure:"CHAT_PG_PORT"`
+	PGUser string `mapstructure:"CHAT_PG_USER"`
+	PGPass string `mapstructure:"CHAT_PG_PASS"`
+	PGName string `mapstructure:"CHAT_PG_NAME"`
 
 	NatsHost string `mapstructure:"NATS_HOST"`
 	NatsPort string `mapstructure:"NATS_PORT"`
@@ -29,6 +29,9 @@ type Env struct {
 	JwtSecret string `mapstructure:"JWT_SECRET"`
 
 	AllowedOrigins []string `mapstructure:"ALLOWED_ORIGINS"`
+
+	GrpcPort                 string `mapstructure:"GRPC_PORT"`
+	SocialServiceGrpcAddress string `mapstructure:"GRPC_SOCIAL_ADR"`
 }
 
 func NewEnv() Env {
@@ -80,6 +83,9 @@ func (e *Env) bindEnv() {
 	e.JwtSecret = os.Getenv("JWT_SECRET")
 
 	e.MigrationPath = os.Getenv("MIGRATION_PATH")
+
+	e.GrpcPort = os.Getenv("GRPC_PORT")
+	e.SocialServiceGrpcAddress = os.Getenv("GRPC_SOCIAL_ADR")
 
 	if val := os.Getenv("ALLOWED_ORIGINS"); val != "" {
 		e.AllowedOrigins = strings.Split(val, ",")

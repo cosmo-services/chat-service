@@ -49,11 +49,6 @@ func (m *AuthMiddleware) OptionalAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")
 
-		if authHeader == "" {
-			ctx.Next()
-			return
-		}
-
 		token, err := pkg.ParseBearerToken(authHeader)
 		if err != nil {
 			ctx.Next()
@@ -62,12 +57,28 @@ func (m *AuthMiddleware) OptionalAuth() gin.HandlerFunc {
 
 		payload, err := m.jwtClient.ValidateToken(token)
 		if err != nil {
-			ctx.Next()
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": err.Error(),
+			})
 			return
 		}
 
 		ctx.Set("user_id", payload.UserID)
 		ctx.Set("is_active", payload.IsActive)
+
+		ctx.Next()
+	}
+}
+
+func (m *AuthMiddleware) RequireActive() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		isActive := ctx.GetBool("is_active")
+		if !isActive {
+			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"error": "ACCOUNT_INACTIVE",
+			})
+			return
+		}
 
 		ctx.Next()
 	}

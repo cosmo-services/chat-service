@@ -3,6 +3,7 @@ module main
 go 1.24.12
 
 require (
+	github.com/cosmo-services/grpc-contracts v1.0.4
 	github.com/gin-gonic/gin v1.11.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/golang-migrate/migrate/v4 v4.19.1
@@ -14,7 +15,7 @@ require (
 	github.com/swaggo/swag v1.16.6
 	go.uber.org/fx v1.24.0
 	go.uber.org/zap v1.26.0
-	google.golang.org/grpc v1.74.2
+	google.golang.org/grpc v1.79.2
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
 )
@@ -79,7 +80,7 @@ require (
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 	golang.org/x/tools v0.39.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250818200422-3122310a409c // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

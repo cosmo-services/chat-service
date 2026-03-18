@@ -43,6 +43,24 @@ func NewChatService(
 	}
 }
 
+func (s *ChatService) GetChatsHistoryView(userId string, filter ChatPageFilter) (*CollectionView, error) {
+	if err := s.userSync.EnsureUserExists(UserSearchOptions{UserID: userId}); err != nil {
+		return nil, err
+	}
+
+	collection, err := s.chatQuery.GetChatHistory(filter)
+	if err != nil {
+		return nil, err
+	}
+
+	collcetionView, err := s.viewService.ProjectCollectionForViewer(userId, collection)
+	if err != nil {
+		return nil, err
+	}
+
+	return collcetionView, nil
+}
+
 func (s *ChatService) GetDirectMessageHistoryView(firstUserId string, secondUsername string, filter MessagePageFilter) (*CollectionView, error) {
 	var directCollection *Collection
 	var err error

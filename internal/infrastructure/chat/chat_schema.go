@@ -29,7 +29,7 @@ type MemberSchema struct {
 	Role     string    `gorm:"not null"`
 	JoinedAt time.Time `gorm:"autoCreateTime"`
 
-	User *UserSchema `gorm:"foreignKey:UserID;references:UserID"`
+	User *UserSchema `gorm:"foreignKey:UserID;references:ID"`
 }
 
 func (MemberSchema) TableName() string {
