@@ -31,6 +31,17 @@ func NewDirectMessageCollection(direct *Chat, msg *Message, sender *User, recipi
 	}
 }
 
+func NewChatMessageCollection(chat *Chat, msg *Message, sender *User) *Collection {
+	return &Collection{
+		Chats:    map[string]*Chat{chat.ID: chat},
+		Messages: map[string]*Message{msg.ID: msg},
+		Users: map[string]*User{
+			sender.ID: sender,
+		},
+		Replies: make(map[string]*Message),
+	}
+}
+
 func NewEmptyDirectCollection(direct *Chat, user1 *User, user2 *User) *Collection {
 	return &Collection{
 		Chats: map[string]*Chat{direct.ID: direct},

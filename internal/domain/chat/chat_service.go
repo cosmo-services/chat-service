@@ -42,7 +42,7 @@ func NewChatService(
 	}
 }
 
-func (s *ChatService) GetDirectMessageHistoryView(firstUserId string, secodnUsername string, filter MessageSearchFilter) (*CollectionView, error) {
+func (s *ChatService) GetDirectMessageHistoryView(firstUserId string, secondUsername string, filter MessageSearchFilter) (*CollectionView, error) {
 	var directCollection *Collection
 	var err error
 
@@ -51,7 +51,7 @@ func (s *ChatService) GetDirectMessageHistoryView(firstUserId string, secodnUser
 		return nil, err
 	}
 
-	user2, err := s.userSync.GetUser(UserSearchOptions{Username: secodnUsername})
+	user2, err := s.userSync.GetUser(UserSearchOptions{Username: secondUsername})
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +92,8 @@ func (s *ChatService) GetChatMessageHistoryView(userId string, chatId string, fi
 	return collectionView, nil
 }
 
-func (s *ChatService) GetDirectChat(firstUserId string, secodndUserId string) (*Chat, error) {
-	direct, err := s.chatRepo.GetDirectChat(firstUserId, secodndUserId)
+func (s *ChatService) GetDirectChat(firstUserId string, secondUserId string) (*Chat, error) {
+	direct, err := s.chatRepo.GetDirectChat(firstUserId, secondUserId)
 	if err == nil {
 		return direct, nil
 	}
@@ -102,12 +102,67 @@ func (s *ChatService) GetDirectChat(firstUserId string, secodndUserId string) (*
 		return nil, err
 	}
 
-	direct, err = s.chatFactory.CreateDirectChat(firstUserId, secodndUserId)
+	direct, err = s.chatFactory.CreateDirectChat(firstUserId, secondUserId)
 	if err != nil {
 		return nil, err
 	}
 
 	return direct, err
+}
+
+func (s *ChatService) GetChatForUser(userId string, chatId string) (*Chat, error) {
+	chat, err := s.chatRepo.GetChatById(chatId)
+	if err != nil {
+		return nil, err
+	}
+
+	if !chat.HasMember(userId) {
+		return nil, ErrChatAccessDenied
+	}
+
+	return chat, nil
+}
+
+func (s *ChatService) SendChatMessage(userId string, chatId string, content string) error {
+	var collection *Collection
+	var err error
+
+	chat, err := s.GetChatForUser(userId, chatId)
+	if err != nil {
+		return err
+	}
+
+	msg, err := s.msgFactory.CreateTextMessage(userId, content)
+	if err != nil {
+		return err
+	}
+
+	if err := s.PersistMessage(userId, chat, msg); err != nil {
+		return err
+	}
+
+	sender, err := s.userSync.GetUser(UserSearchOptions{UserID: userId})
+	if err != nil {
+		return err
+	}
+
+	if chat.Type == ChatTypeDirect {
+		companionId := chat.GetMemberIdsExcluding(userId)[0]
+		companion, err := s.userSync.GetUser(UserSearchOptions{UserID: companionId})
+		if err != nil {
+			return err
+		}
+
+		collection = NewDirectMessageCollection(chat, msg, sender, companion)
+	} else {
+		collection = NewChatMessageCollection(chat, msg, sender)
+	}
+
+	if err := s.deliverToChatMembers(chat, collection, NewMessageEvent); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *ChatService) SendDirectMessage(userId string, recipientUsername string, content string) error {
