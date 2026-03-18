@@ -6,8 +6,10 @@ import (
 	"main/internal/config"
 	"main/pkg"
 
+	chat_domain "main/internal/domain/chat"
+
 	auth_infrastructure "main/internal/infrastructure/auth"
-	test_infrastructure "main/internal/infrastructure/test"
+	chat_infrastructure "main/internal/infrastructure/chat"
 
 	health_http "main/internal/application/http/v2/health"
 	swagger_http "main/internal/application/http/v2/swagger"
@@ -20,8 +22,10 @@ var CommonModules = fx.Options(
 	config.Module,
 	pkg.Module,
 
+	chat_domain.Module,
+
 	auth_infrastructure.Module,
-	test_infrastructure.Module,
+	chat_infrastructure.Module,
 
 	api.Module,
 	jobs.Module,
