@@ -17,7 +17,7 @@ func NewChatQuery(db pkg.GormDB) chat_domain.ChatQuery {
 	return &chatQuery{db: db}
 }
 
-func (q *chatQuery) GetChatHistory(cursor string, direction string, limit int) (*chat_domain.Collection, error) {
+func (q *chatQuery) GetChatHistory(filter chat_domain.ChatSearchFilter) (*chat_domain.Collection, error) {
 	collection := &chat_domain.Collection{
 		Chats:    make(map[string]*chat_domain.Chat),
 		Messages: make(map[string]*chat_domain.Message),
@@ -30,7 +30,7 @@ func (q *chatQuery) GetChatHistory(cursor string, direction string, limit int) (
 	query := q.db.DB.
 		Preload("Members.User")
 
-	page, err := pkg.Paginate(query, &chats, cursor, "updated_at", direction, limit)
+	page, err := pkg.Paginate(query, &chats, filter.Cursor, "updated_at", filter.Direction, filter.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (q *chatQuery) GetChatHistory(cursor string, direction string, limit int) (
 	return collection, nil
 }
 
-func (q *chatQuery) GetMessageHistory(chatId string, cursor string, direction string, limit int) (*chat_domain.Collection, error) {
+func (q *chatQuery) GetMessageHistory(chatId string, filter chat_domain.MessageSearchFilter) (*chat_domain.Collection, error) {
 	collection := &chat_domain.Collection{
 		Chats:    make(map[string]*chat_domain.Chat),
 		Messages: make(map[string]*chat_domain.Message),
@@ -136,10 +136,10 @@ func (q *chatQuery) GetMessageHistory(chatId string, cursor string, direction st
 	page, err := pkg.Paginate(
 		query,
 		&messages,
-		cursor,
+		filter.Cursor,
 		"created_at",
-		direction,
-		limit,
+		filter.Direction,
+		filter.Limit,
 	)
 	if err != nil {
 		return nil, err

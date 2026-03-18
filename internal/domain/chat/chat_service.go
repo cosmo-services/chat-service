@@ -16,6 +16,7 @@ type ChatService struct {
 	msgRepo     MessageRepository
 	msgFactory  *MessageFactory
 	viewService *ViewService
+	chatQuery   ChatQuery
 	publisher   Publisher
 }
 
@@ -26,6 +27,7 @@ func NewChatService(
 	msgRepo MessageRepository,
 	msgFactory *MessageFactory,
 	viewService *ViewService,
+	chatQuery ChatQuery,
 	publisher Publisher,
 ) *ChatService {
 	return &ChatService{
@@ -35,8 +37,45 @@ func NewChatService(
 		msgRepo:     msgRepo,
 		msgFactory:  msgFactory,
 		viewService: viewService,
+		chatQuery:   chatQuery,
 		publisher:   publisher,
 	}
+}
+
+func (s *ChatService) GetDirectChatView(firstUserId string, secodnUsername string, filter MessageSearchFilter) (*CollectionView, error) {
+	var directCollection *Collection
+	var err error
+
+	user1, err := s.userSync.GetUser(UserSearchOptions{UserID: firstUserId})
+	if err != nil {
+		return nil, err
+	}
+
+	user2, err := s.userSync.GetUser(UserSearchOptions{Username: secodnUsername})
+	if err != nil {
+		return nil, err
+	}
+
+	direct, err := s.GetDirectChat(user1.ID, user2.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if direct.IsPersisted() {
+		directCollection, err = s.chatQuery.GetMessageHistory(direct.ID, filter)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		directCollection = NewEmptyDirectCollection(direct, user1, user2)
+	}
+
+	directCollectionView, err := s.viewService.ProjectCollectionForViewer(firstUserId, directCollection)
+	if err != nil {
+		return nil, err
+	}
+
+	return directCollectionView, nil
 }
 
 func (s *ChatService) GetDirectChat(firstUserId string, secodndUserId string) (*Chat, error) {
