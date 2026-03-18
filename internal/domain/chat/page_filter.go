@@ -1,12 +1,12 @@
 package chat
 
-type MessageSearchFilter struct {
+type MessagePageFilter struct {
 	Cursor    string
 	Direction string
 	Limit     int
 }
 
-type ChatSearchFilter struct {
+type ChatPageFilter struct {
 	Cursor    string
 	Direction string
 	Limit     int

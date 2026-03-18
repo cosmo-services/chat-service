@@ -7,6 +7,7 @@ import (
 
 const (
 	NewMessageEvent string = "new_message"
+	NewChatEvent    string = "new_chat"
 )
 
 type ChatService struct {
@@ -42,7 +43,7 @@ func NewChatService(
 	}
 }
 
-func (s *ChatService) GetDirectMessageHistoryView(firstUserId string, secondUsername string, filter MessageSearchFilter) (*CollectionView, error) {
+func (s *ChatService) GetDirectMessageHistoryView(firstUserId string, secondUsername string, filter MessagePageFilter) (*CollectionView, error) {
 	var directCollection *Collection
 	var err error
 
@@ -78,7 +79,7 @@ func (s *ChatService) GetDirectMessageHistoryView(firstUserId string, secondUser
 	return directCollectionView, nil
 }
 
-func (s *ChatService) GetChatMessageHistoryView(userId string, chatId string, filter MessageSearchFilter) (*CollectionView, error) {
+func (s *ChatService) GetChatMessageHistoryView(userId string, chatId string, filter MessagePageFilter) (*CollectionView, error) {
 	collection, err := s.chatQuery.GetMessageHistory(chatId, filter)
 	if err != nil {
 		return nil, err
@@ -137,7 +138,7 @@ func (s *ChatService) SendChatMessage(userId string, chatId string, content stri
 		return err
 	}
 
-	if err := s.PersistMessage(userId, chat, msg); err != nil {
+	if err := s.persistMessage(chat, msg); err != nil {
 		return err
 	}
 
@@ -186,7 +187,7 @@ func (s *ChatService) SendDirectMessage(userId string, recipientUsername string,
 		return err
 	}
 
-	if err := s.PersistMessage(userId, direct, msg); err != nil {
+	if err := s.persistMessage(direct, msg); err != nil {
 		return err
 	}
 
@@ -198,7 +199,7 @@ func (s *ChatService) SendDirectMessage(userId string, recipientUsername string,
 	return nil
 }
 
-func (s *ChatService) PersistMessage(userId string, chat *Chat, msg *Message) error {
+func (s *ChatService) persistMessage(chat *Chat, msg *Message) error {
 	if !chat.IsPersisted() {
 		if err := s.chatRepo.Create(chat); err != nil {
 			return err

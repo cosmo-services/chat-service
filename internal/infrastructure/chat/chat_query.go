@@ -17,7 +17,7 @@ func NewChatQuery(db pkg.GormDB) chat_domain.ChatQuery {
 	return &chatQuery{db: db}
 }
 
-func (q *chatQuery) GetChatHistory(filter chat_domain.ChatSearchFilter) (*chat_domain.Collection, error) {
+func (q *chatQuery) GetChatHistory(filter chat_domain.ChatPageFilter) (*chat_domain.Collection, error) {
 	collection := &chat_domain.Collection{
 		Chats:    make(map[string]*chat_domain.Chat),
 		Messages: make(map[string]*chat_domain.Message),
@@ -97,7 +97,7 @@ func (q *chatQuery) GetChatHistory(filter chat_domain.ChatSearchFilter) (*chat_d
 	return collection, nil
 }
 
-func (q *chatQuery) GetMessageHistory(chatId string, filter chat_domain.MessageSearchFilter) (*chat_domain.Collection, error) {
+func (q *chatQuery) GetMessageHistory(chatId string, filter chat_domain.MessagePageFilter) (*chat_domain.Collection, error) {
 	collection := &chat_domain.Collection{
 		Chats:    make(map[string]*chat_domain.Chat),
 		Messages: make(map[string]*chat_domain.Message),
