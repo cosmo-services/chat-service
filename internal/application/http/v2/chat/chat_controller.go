@@ -175,7 +175,7 @@ func (controller *ChatController) GetChatMessages(ctx *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Param username path string true "Username"
-// @Param request body	SendDirectMessageRequest true "Send direct message request"
+// @Param request body	SendMessageRequest true "Send message request"
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -186,7 +186,7 @@ func (controller *ChatController) SendDirectMessage(ctx *gin.Context) {
 	userId := ctx.GetString("user_id")
 	username := ctx.Param("username")
 
-	var req *SendDirectMessageRequest
+	var req *SendMessageRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		controller.logger.Error(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -196,6 +196,48 @@ func (controller *ChatController) SendDirectMessage(ctx *gin.Context) {
 
 	if err := controller.chatService.SendDirectMessage(userId, username, req.Content); err != nil {
 		if errors.Is(err, chat_domain.ErrUserNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "message sent",
+	})
+}
+
+// SendChatMessage godoc
+//
+// @Summary Send chat message
+// @Description Send message to chat by id
+// @Tags chat
+// @Accept  json
+// @Produce json
+// @Security BearerAuth
+// @Param chat_id path string true "Chat ID"
+// @Param request body	SendMessageRequest true "Send message request"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 404 {object} map[string]string "Chat not found"
+// @Router /{chat_id}/messages [post]
+func (controller *ChatController) SendChatMessage(ctx *gin.Context) {
+	userId := ctx.GetString("user_id")
+	chatId := ctx.Param("chat_id")
+
+	var req *SendMessageRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		controller.logger.Error(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+		return
+	}
+
+	if err := controller.chatService.SendChatMessage(userId, chatId, req.Content); err != nil {
+		if errors.Is(err, chat_domain.ErrChatNotFound) {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}

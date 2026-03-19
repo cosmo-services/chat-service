@@ -1,5 +1,5 @@
 package chat_http
 
-type SendDirectMessageRequest struct {
+type SendMessageRequest struct {
 	Content string `json:"content"`
 }

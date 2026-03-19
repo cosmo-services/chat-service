@@ -36,5 +36,6 @@ func (r *ChatRoutes) Setup() {
 	cmd.Use(r.authMiddleware.RequireAuth(), r.authMiddleware.RequireActive())
 	{
 		cmd.POST("/direct/:username/messages", r.controller.SendDirectMessage)
+		cmd.POST("/:chat_id/messages", r.controller.SendChatMessage)
 	}
 }
