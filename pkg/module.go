@@ -7,6 +7,7 @@ import (
 var Module = fx.Options(
 	fx.Provide(NewRequestHandler),
 	fx.Provide(GetLogger),
-	fx.Provide(NewPostgresDatabase),
+	fx.Provide(NewGormDatabase),
 	fx.Provide(NewNatsClient),
+	fx.Provide(NewGrpcClient),
 )

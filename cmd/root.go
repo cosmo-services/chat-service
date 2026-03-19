@@ -7,11 +7,10 @@ import (
 
 	"go.uber.org/fx"
 
-	"main/pkg"
-
-	"main/internal/application/api/v2"
+	"main/internal/application/http/v2"
 	"main/internal/application/jobs"
 	"main/internal/config"
+	"main/pkg"
 )
 
 func SetupApp(
@@ -19,13 +18,15 @@ func SetupApp(
 	env config.Env,
 	logger pkg.Logger,
 	handler pkg.RequestHandler,
-	routes api.Routes,
+	routes http.Routes,
+	grpcClient *pkg.GrpcClient,
 	workers jobs.Workers,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	lc.Append(fx.Hook{
 		OnStart: func(startCtx context.Context) error {
+
 			go func() {
 				workers.Run(ctx)
 			}()
@@ -42,6 +43,8 @@ func SetupApp(
 		},
 		OnStop: func(stopCtx context.Context) error {
 			cancel()
+
+			grpcClient.CloseAllConnections()
 
 			return nil
 		},

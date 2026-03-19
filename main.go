@@ -12,7 +12,7 @@ import (
 // @name Authorization
 // @security BearerAuth
 
-// @BasePath /api/v2/
+// @BasePath /api/v2/chat
 func main() {
 	cmd.StartApp()
 }

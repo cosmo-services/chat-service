@@ -8,8 +8,6 @@ import (
 
 	"main/internal/config"
 
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 )
@@ -46,24 +44,9 @@ func NewPostgresDatabase(logger Logger, env config.Env) PostgresDB {
 
 	logger.Info("Successfully connected to PostgreSQL")
 
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
-	if err != nil {
-		logger.Fatal("migration driver error: ", err)
+	if err := RunPostgresMigrations(db, env.MigrationPath); err != nil {
+		logger.Fatalf("migration failed: %w", err)
 	}
-
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://"+env.MigrationPath,
-		"postgres",
-		driver,
-	)
-	if err != nil {
-		logger.Fatal("migration init error: ", err)
-	}
-
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		logger.Fatal("migration failed: ", err)
-	}
-
 	logger.Info("Successfully applied database migrations")
 
 	return PostgresDB{db}

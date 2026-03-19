@@ -1,17 +1,21 @@
 package bootstrap
 
 import (
-	"main/internal/application/api/v2"
+	"main/internal/application/http/v2"
 	"main/internal/application/jobs"
 	"main/internal/config"
 	"main/pkg"
 
-	auth_infrastructure "main/internal/infrastructure/auth"
-	test_infrastructure "main/internal/infrastructure/test"
+	chat_domain "main/internal/domain/chat"
 
-	health_api "main/internal/application/api/v2/health"
-	swagger_api "main/internal/application/api/v2/swagger"
-	test_api "main/internal/application/api/v2/test"
+	auth_infrastructure "main/internal/infrastructure/auth"
+	chat_infrastructure "main/internal/infrastructure/chat"
+	social_infrastructure "main/internal/infrastructure/social"
+
+	auth_http "main/internal/application/http/v2/auth"
+	chat_http "main/internal/application/http/v2/chat"
+	health_http "main/internal/application/http/v2/health"
+	swagger_http "main/internal/application/http/v2/swagger"
 
 	"go.uber.org/fx"
 )
@@ -20,12 +24,16 @@ var CommonModules = fx.Options(
 	config.Module,
 	pkg.Module,
 
-	auth_infrastructure.Module,
-	test_infrastructure.Module,
+	chat_domain.Module,
 
-	api.Module,
+	auth_infrastructure.Module,
+	chat_infrastructure.Module,
+	social_infrastructure.Module,
+
+	http.Module,
 	jobs.Module,
-	health_api.Module,
-	swagger_api.Module,
-	test_api.Module,
+	auth_http.Module,
+	health_http.Module,
+	swagger_http.Module,
+	chat_http.Module,
 )
