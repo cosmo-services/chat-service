@@ -25,7 +25,7 @@ func (q *chatQuery) GetChatHistory(filter chat_domain.ChatPageFilter) (*chat_dom
 		Users:    make(map[string]*chat_domain.User),
 	}
 
-	var chats []ChatSchema
+	var chats []*ChatSchema
 
 	query := q.db.DB.
 		Preload("Members.User")
@@ -77,7 +77,7 @@ func (q *chatQuery) GetChatHistory(filter chat_domain.ChatPageFilter) (*chat_dom
 	}
 
 	for _, chatSchema := range chats {
-		chat := ToDomainChat(&chatSchema)
+		chat := ToDomainChat(chatSchema)
 		chat.Members = make([]*chat_domain.ChatMember, 0, len(chatSchema.Members))
 
 		for _, memberSchema := range chatSchema.Members {
@@ -137,7 +137,7 @@ func (q *chatQuery) GetMessageHistory(chatId string, filter chat_domain.MessageP
 		query,
 		&messages,
 		filter.Cursor,
-		"created_at",
+		"id",
 		filter.Direction,
 		filter.Limit,
 	)

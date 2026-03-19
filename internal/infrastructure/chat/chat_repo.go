@@ -3,6 +3,7 @@ package chat_infrastructure
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	chat_domain "main/internal/domain/chat"
@@ -25,21 +26,12 @@ func (r *chatRepository) Create(chat *chat_domain.Chat) error {
 	}
 
 	return r.db.WithTransaction(context.Background(), func(tx *gorm.DB) error {
+		chat.ID = generateChatID()
+
 		schema := ToSchemaChat(chat)
 
 		if err := tx.Create(schema).Error; err != nil {
 			return err
-		}
-
-		if len(chat.Members) > 0 {
-			for _, member := range chat.Members {
-				memberSchema := ToSchemaMember(member)
-				memberSchema.ChatID = chat.ID
-
-				if err := tx.Create(memberSchema).Error; err != nil {
-					return err
-				}
-			}
 		}
 
 		return nil
@@ -295,4 +287,8 @@ func (r *chatRepository) syncMembers(
 	}
 
 	return nil
+}
+
+func generateChatID() string {
+	return fmt.Sprintf("chat_%d", time.Now().UnixNano())
 }

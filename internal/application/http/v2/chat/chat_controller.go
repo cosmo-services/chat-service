@@ -117,3 +117,45 @@ func (controller *ChatController) GetDirectMessages(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, collection)
 }
+
+// SendDirectMessage godoc
+//
+// @Summary Send direct message
+// @Description Send direct message to user by username
+// @Tags chat
+// @Accept  json
+// @Produce json
+// @Security BearerAuth
+// @Param username path string true "Username"
+// @Param request body	SendDirectMessageRequest true "Send direct message request"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 404 {object} map[string]string "User not found"
+// @Router /direct/{username}/messages [post]
+func (controller *ChatController) SendDirectMessage(ctx *gin.Context) {
+	userId := ctx.GetString("user_id")
+	username := ctx.Param("username")
+
+	var req *SendDirectMessageRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		controller.logger.Error(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+		return
+	}
+
+	if err := controller.chatService.SendDirectMessage(userId, username, req.Content); err != nil {
+		if errors.Is(err, chat_domain.ErrUserNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "message sent",
+	})
+}

@@ -2,8 +2,10 @@ package chat_infrastructure
 
 import (
 	"errors"
+	"fmt"
 	chat_domain "main/internal/domain/chat"
 	"main/pkg"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -20,6 +22,8 @@ func (r *messageRepository) CreateMessage(message *chat_domain.Message) error {
 	if message == nil {
 		return errors.New("message cannot be nil")
 	}
+
+	message.ID = generateMessageID()
 
 	schema := ToSchemaMessage(message)
 
@@ -114,4 +118,8 @@ func (r *messageRepository) RestoreMessage(id string) error {
 		return err
 	}
 	return nil
+}
+
+func generateMessageID() string {
+	return fmt.Sprintf("msg_%d", time.Now().UnixNano())
 }

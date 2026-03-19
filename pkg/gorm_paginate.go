@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 
@@ -13,63 +14,62 @@ type Page struct {
 	HasPrev bool
 }
 
-func Paginate(db *gorm.DB, dest interface{}, cursor string, column string, direction string, limit int) (*Page, error) {
-	baseQuery := db.Session(&gorm.Session{})
-	dataQuery := baseQuery.Session(&gorm.Session{})
+func Paginate[T any](db *gorm.DB, dest *[]*T, cursor, column, direction string, limit int) (*Page, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+
+	base := db.Session(&gorm.Session{})
+	data := base.Session(&gorm.Session{})
 
 	if cursor != "" {
 		switch direction {
 		case "next":
-			dataQuery = dataQuery.Where(fmt.Sprintf("%s > ?", column), cursor).
-				Order(fmt.Sprintf("%s ASC", column))
+			data = data.Where(column+"> ?", cursor).Order(column + " ASC")
 		case "prev":
-			dataQuery = dataQuery.Where(fmt.Sprintf("%s < ?", column), cursor).
-				Order(fmt.Sprintf("%s DESC", column))
+			data = data.Where(column+"< ?", cursor).Order(column + " DESC")
 		default:
-			dataQuery = dataQuery.Order(fmt.Sprintf("%s DESC", column))
+			data = data.Order(column + " DESC")
 		}
 	} else {
-		dataQuery = dataQuery.Order(fmt.Sprintf("%s DESC", column))
+		data = data.Order(column + " DESC")
 	}
 
-	if err := dataQuery.Limit(limit).Find(dest).Error; err != nil {
+	if err := data.Limit(limit).Find(dest).Error; err != nil {
 		return nil, err
 	}
 
-	items := reflect.ValueOf(dest).Elem()
-	if items.Len() == 0 {
-		return &Page{
-			Items:   dest,
-			HasNext: false,
-			HasPrev: false,
-		}, nil
+	if len(*dest) == 0 {
+		return &Page{Items: dest, HasNext: false, HasPrev: false}, nil
 	}
 
-	var minVal, maxVal string
-	err := baseQuery.Session(&gorm.Session{}).
+	var model T
+
+	var globalMin, globalMax sql.NullString
+	err := base.Model(&model).
 		Select(fmt.Sprintf("MIN(%s), MAX(%s)", column, column)).
-		Row().Scan(&minVal, &maxVal)
+		Row().Scan(&globalMin, &globalMax)
 	if err != nil {
 		return nil, err
 	}
 
-	var hasPrev bool
-	if minVal != "" {
-		prevCheck := baseQuery.Session(&gorm.Session{}).
-			Where(fmt.Sprintf("%s < ?", column), minVal)
-		err = prevCheck.Select("EXISTS(?)", prevCheck).Find(&hasPrev).Error
-		if err != nil {
-			return nil, err
-		}
+	fieldName, err := getFieldNameByColumn(db, &model, column)
+	if err != nil {
+		return nil, err
 	}
 
-	var hasNext bool
-	if maxVal != "" {
-		nextCheck := baseQuery.Session(&gorm.Session{}).
-			Where(fmt.Sprintf("%s > ?", column), maxVal)
-		err = nextCheck.Select("EXISTS(?)", nextCheck).Find(&hasNext).Error
-		if err != nil {
-			return nil, err
+	hasPrev := true
+	hasNext := true
+
+	for _, item := range *dest {
+		val := reflect.ValueOf(item).Elem().FieldByName(fieldName).Interface()
+		strVal := fmt.Sprint(val)
+
+		if globalMin.Valid && strVal == globalMin.String {
+			hasPrev = false
+		}
+		if globalMax.Valid && strVal == globalMax.String {
+			hasNext = false
 		}
 	}
 
@@ -78,4 +78,19 @@ func Paginate(db *gorm.DB, dest interface{}, cursor string, column string, direc
 		HasNext: hasNext,
 		HasPrev: hasPrev,
 	}, nil
+}
+
+func getFieldNameByColumn(db *gorm.DB, model interface{}, columnName string) (string, error) {
+	stmt := &gorm.Statement{DB: db}
+	if err := stmt.Parse(model); err != nil {
+		return "", err
+	}
+
+	for _, field := range stmt.Schema.Fields {
+		if field.DBName == columnName {
+			return field.Name, nil
+		}
+	}
+
+	return "", fmt.Errorf("column %s not found in model", columnName)
 }

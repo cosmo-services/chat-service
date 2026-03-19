@@ -35,6 +35,8 @@ func (s *ViewService) ProjectCollectionForViewers(viewersId []string, collection
 
 func (s *ViewService) ProjectCollectionForViewer(viewerId string, collection *Collection) (*CollectionView, error) {
 	collView := NewCollectionView()
+	collView.HasNext = collection.HasNext
+	collView.HasPrev = collection.HasPrev
 
 	for _, user := range collection.Users {
 		collView.Users[user.ID] = s.projectUser(user)
