@@ -20,6 +20,7 @@ type ChatView struct {
 	AvatarUrl   string        `json:"avatar_url"`
 	Description string        `json:"description"`
 	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
 	Members     []*MemberView `json:"members"`
 }
 

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -14,7 +15,7 @@ type Page struct {
 	HasPrev bool
 }
 
-func Paginate[T any](db *gorm.DB, dest *[]*T, cursor, column, direction string, limit int) (*Page, error) {
+func Paginate[T any](db *gorm.DB, dest *[]*T, cursor string, column string, direction string, limit int) (*Page, error) {
 	if limit <= 0 {
 		limit = 20
 	}
@@ -57,13 +58,12 @@ func Paginate[T any](db *gorm.DB, dest *[]*T, cursor, column, direction string, 
 	if err != nil {
 		return nil, err
 	}
-
 	hasPrev := true
 	hasNext := true
 
 	for _, item := range *dest {
 		val := reflect.ValueOf(item).Elem().FieldByName(fieldName).Interface()
-		strVal := fmt.Sprint(val)
+		strVal := toString(val)
 
 		if globalMin.Valid && strVal == globalMin.String {
 			hasPrev = false
@@ -93,4 +93,30 @@ func getFieldNameByColumn(db *gorm.DB, model interface{}, columnName string) (st
 	}
 
 	return "", fmt.Errorf("column %s not found in model", columnName)
+}
+
+func toString(val interface{}) string {
+	switch v := val.(type) {
+	case string:
+		return v
+	case time.Time:
+		return v.UTC().Format("2006-01-02T15:04:05.999999Z")
+	case *time.Time:
+		if v != nil {
+			return v.UTC().Format("2006-01-02T15:04:05.999999Z")
+		}
+		return ""
+	case int, int8, int16, int32, int64:
+		return fmt.Sprintf("%d", v)
+	case uint, uint8, uint16, uint32, uint64:
+		return fmt.Sprintf("%d", v)
+	case float32, float64:
+		return fmt.Sprintf("%f", v)
+	case bool:
+		return fmt.Sprintf("%t", v)
+	case fmt.Stringer:
+		return v.String()
+	default:
+		return fmt.Sprint(v)
+	}
 }

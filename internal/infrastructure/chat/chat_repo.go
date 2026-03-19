@@ -27,6 +27,8 @@ func (r *chatRepository) Create(chat *chat_domain.Chat) error {
 
 	return r.db.WithTransaction(context.Background(), func(tx *gorm.DB) error {
 		chat.ID = generateChatID()
+		chat.CreatedAt = time.Now()
+		chat.UpdatedAt = time.Now()
 
 		schema := ToSchemaChat(chat)
 
@@ -44,6 +46,8 @@ func (r *chatRepository) Update(chat *chat_domain.Chat) error {
 	}
 
 	return r.db.WithTransaction(context.Background(), func(tx *gorm.DB) error {
+		chat.UpdatedAt = time.Now()
+
 		schema := ToSchemaChat(chat)
 
 		if err := tx.Model(&ChatSchema{}).

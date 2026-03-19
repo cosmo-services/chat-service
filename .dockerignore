@@ -1,6 +1,6 @@
 # Docker ignore
-#.env
-#.env.*
+.env
+.env.*
 .git
 .gitignore
 node_modules/

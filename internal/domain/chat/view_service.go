@@ -95,6 +95,7 @@ func (s *ViewService) projectChat(userId string, chat *Chat, users map[string]*U
 		AvatarUrl:   chatAvatar,
 		Description: chat.Description,
 		CreatedAt:   chat.CreatedAt,
+		UpdatedAt:   chat.UpdatedAt,
 		Members:     memberViews,
 	}, nil
 }

@@ -10,11 +10,12 @@ import (
 )
 
 type chatQuery struct {
-	db pkg.GormDB
+	db     pkg.GormDB
+	logger pkg.Logger
 }
 
-func NewChatQuery(db pkg.GormDB) chat_domain.ChatQuery {
-	return &chatQuery{db: db}
+func NewChatQuery(db pkg.GormDB, logger pkg.Logger) chat_domain.ChatQuery {
+	return &chatQuery{db: db, logger: logger}
 }
 
 func (q *chatQuery) GetChatHistory(filter chat_domain.ChatPageFilter) (*chat_domain.Collection, error) {

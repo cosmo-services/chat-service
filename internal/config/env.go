@@ -69,11 +69,11 @@ func (e *Env) bindEnv() {
 	e.AppEnv = os.Getenv("APP_ENV")
 	e.Port = os.Getenv("PORT")
 
-	e.PGHost = os.Getenv("PG_HOST")
-	e.PGPort = os.Getenv("PG_PORT")
-	e.PGUser = os.Getenv("PG_USER")
-	e.PGPass = os.Getenv("PG_PASS")
-	e.PGName = os.Getenv("PG_NAME")
+	e.PGHost = os.Getenv("CHAT_PG_HOST")
+	e.PGPort = os.Getenv("CHAT_PG_PORT")
+	e.PGUser = os.Getenv("CHAT_PG_USER")
+	e.PGPass = os.Getenv("CHAT_PG_PASS")
+	e.PGName = os.Getenv("CHAT_PG_NAME")
 
 	e.NatsHost = os.Getenv("NATS_HOST")
 	e.NatsPort = os.Getenv("NATS_PORT")

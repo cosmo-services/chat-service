@@ -28,14 +28,14 @@ func NewChatController(
 // GetChatsHistory godoc
 //
 // @Summary Get user chats
-// @Description Get cursor paginated chats
+// @Description Get cursor-paginated list of user's chats sorted by last activity (updated_at)
 // @Tags chat
 // @Accept  json
 // @Produce json
 // @Security BearerAuth
-// @Param cursor query string false "Cursor"
-// @Param direction query string false "Direction"
-// @Param limit query string false "limit"
+// @Param cursor query string false "Cursor (timestamp, e.g., 2024-01-15T10:30:00Z). First page if empty"
+// @Param direction query string false "Pagination direction: 'next' (newer chats) or 'prev' (older chats). Default is 'prev' (most recent first)."
+// @Param limit query int false "Number of chats per page (default: 10, max: 100)"
 // @Success 200 {object} chat.CollectionView
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -72,16 +72,16 @@ func (controller *ChatController) GetChatsHistory(ctx *gin.Context) {
 
 // GetDirectMessages godoc
 //
-// @Summary Get direct chat history
-// @Description Get cursor paginated messages
+// @Summary Get direct message history
+// @Description Get cursor-paginated messages from a direct chat with specific user
 // @Tags chat
 // @Accept  json
 // @Produce json
 // @Security BearerAuth
-// @Param username path string true "Username"
-// @Param cursor query string false "Cursor"
-// @Param direction query string false "Direction"
-// @Param limit query string false "limit"
+// @Param username path string true "Recipient username (the user you're chatting with)"
+// @Param cursor query string false "Cursor - last message ID from previous page (e.g., 'msg_1234567890'). Empty for first page."
+// @Param direction query string false "Pagination direction: 'next' (older messages) or 'prev' (newer messages). Default is 'prev' (most recent first)."
+// @Param limit query int false "Number of messages per page (default: 20, max: 100)"
 // @Success 200 {object} chat.CollectionView
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -121,15 +121,15 @@ func (controller *ChatController) GetDirectMessages(ctx *gin.Context) {
 // GetChatMessages godoc
 //
 // @Summary Get chat message history
-// @Description Get cursor paginated messages
+// @Description Get cursor-paginated messages from a specific chat (group or direct)
 // @Tags chat
 // @Accept  json
 // @Produce json
 // @Security BearerAuth
-// @Param chat_id path string true "Chat ID"
-// @Param cursor query string false "Cursor"
-// @Param direction query string false "Direction"
-// @Param limit query string false "Limit"
+// @Param chat_id path string true "Chat ID (e.g., 'chat_1234567890')"
+// @Param cursor query string false "Cursor - last message ID from previous page (e.g., 'msg_1234567890'). Empty for first page."
+// @Param direction query string false "Pagination direction: 'next' (older messages) or 'prev' (newer messages). Default is 'prev' (most recent first)."
+// @Param limit query int false "Number of messages per page (default: 20, max: 100)"
 // @Success 200 {object} chat.CollectionView
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -169,18 +169,18 @@ func (controller *ChatController) GetChatMessages(ctx *gin.Context) {
 // SendDirectMessage godoc
 //
 // @Summary Send direct message
-// @Description Send direct message to user by username
+// @Description Send a message to a user by username. Creates or updates direct chat automatically
 // @Tags chat
 // @Accept  json
 // @Produce json
 // @Security BearerAuth
-// @Param username path string true "Username"
-// @Param request body	SendMessageRequest true "Send message request"
-// @Success 201 {object} map[string]string
-// @Failure 400 {object} map[string]string "Bad request"
+// @Param username path string true "Recipient username (the user you want to message)"
+// @Param request body SendMessageRequest true "Message content (text, media, etc.)"
+// @Success 201 {object} map[string]string "Message sent successfully"
+// @Failure 400 {object} map[string]string "Bad request - invalid message format"
 // @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "User not found - recipient doesn't exist"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Failure 404 {object} map[string]string "User not found"
 // @Router /direct/{username}/messages [post]
 func (controller *ChatController) SendDirectMessage(ctx *gin.Context) {
 	userId := ctx.GetString("user_id")
@@ -210,19 +210,20 @@ func (controller *ChatController) SendDirectMessage(ctx *gin.Context) {
 
 // SendChatMessage godoc
 //
-// @Summary Send chat message
-// @Description Send message to chat by id
+// @Summary Send message to chat
+// @Description Send a message to an existing group chat by chat ID
 // @Tags chat
 // @Accept  json
 // @Produce json
 // @Security BearerAuth
-// @Param chat_id path string true "Chat ID"
-// @Param request body	SendMessageRequest true "Send message request"
-// @Success 201 {object} map[string]string
-// @Failure 400 {object} map[string]string "Bad request"
-// @Failure 401 {object} map[string]string "Unauthorized"
+// @Param chat_id path string true "Chat ID (e.g., 'chat_1234567890')"
+// @Param request body SendMessageRequest true "Message content (text, reply_to, attachments)"
+// @Success 201 {object} map[string]string "Message sent successfully"
+// @Failure 400 {object} map[string]string "Bad request - invalid message format or empty content"
+// @Failure 401 {object} map[string]string "Unauthorized - invalid or missing token"
+// @Failure 403 {object} map[string]string "Forbidden - user is not a member of this chat"
+// @Failure 404 {object} map[string]string "Chat not found - chat doesn't exist or has been deleted"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Failure 404 {object} map[string]string "Chat not found"
 // @Router /{chat_id}/messages [post]
 func (controller *ChatController) SendChatMessage(ctx *gin.Context) {
 	userId := ctx.GetString("user_id")
