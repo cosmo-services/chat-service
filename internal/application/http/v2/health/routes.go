@@ -20,7 +20,7 @@ func NewHealthRoutes(
 }
 
 func (r *HealthRoutes) Setup() {
-	group := r.handler.Gin.Group("/api/v2/")
+	group := r.handler.Gin.Group("/api/v2/chat")
 
 	group.GET("/health", r.healthController.Health)
 }
