@@ -48,7 +48,7 @@ func (s *ChatService) GetChatsHistoryView(userId string, filter ChatPageFilter) 
 		return nil, err
 	}
 
-	collection, err := s.chatQuery.GetChatHistory(filter)
+	collection, err := s.chatQuery.GetChatHistory(userId, filter)
 	if err != nil {
 		return nil, err
 	}
