@@ -18,7 +18,7 @@ func NewChatQuery(db pkg.GormDB, logger pkg.Logger) chat_domain.ChatQuery {
 	return &chatQuery{db: db, logger: logger}
 }
 
-func (q *chatQuery) GetChatHistory(filter chat_domain.ChatPageFilter) (*chat_domain.Collection, error) {
+func (q *chatQuery) GetChatHistory(userId string, filter chat_domain.ChatPageFilter) (*chat_domain.Collection, error) {
 	collection := &chat_domain.Collection{
 		Chats:    make(map[string]*chat_domain.Chat),
 		Messages: make(map[string]*chat_domain.Message),
@@ -29,6 +29,9 @@ func (q *chatQuery) GetChatHistory(filter chat_domain.ChatPageFilter) (*chat_dom
 	var chats []*ChatSchema
 
 	query := q.db.DB.
+		Joins("JOIN chat_members ON chat_members.chat_id = chats.id").
+		Where("chat_members.user_id = ?", userId).
+		Group("chats.id").
 		Preload("Members.User")
 
 	page, err := pkg.Paginate(query, &chats, filter.Cursor, "updated_at", filter.Direction, filter.Limit)
